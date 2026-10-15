@@ -1,0 +1,254 @@
+{
+  "name": "Evaluation",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        608
+      ],
+      "id": "68b619b5-dac0-4417-bb14-5ea54ffb27b7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const emails = [\n  { id: 1, expected: \"invoice\", email_text: \"От: accounting@stroymarket.az\\nТема: Счёт №1457\\n\\nНаправляем счёт №1457 на сумму 2 350 AZN за поставку цемента. Оплатить до 25 октября 2026.\" },\n  { id: 2, expected: \"invoice\", email_text: \"От: billing@cloudhost.com\\nТема: Invoice #88 for October\\n\\nDear customer, please find the invoice for 1,200 USD for hosting services. Payment due by 2026-11-10.\" },\n  { id: 3, expected: \"invoice\", email_text: \"От: buh@avtoservis.az\\nТема: Счёт на оплату\\n\\nВыставляем счёт за ремонт автомобиля: 480 AZN. Срок оплаты 5 ноября 2026.\" },\n  { id: 4, expected: \"invoice\", email_text: \"От: finance@techsupply.com\\nТема: Payment request INV-2026-310\\n\\nPlease pay 3,750 EUR for the equipment delivered in September. Due date: 2026-11-01.\" },\n  { id: 5, expected: \"invoice\", email_text: \"От: office@reklama-pro.az\\nТема: Счёт за рекламу\\n\\nСчёт №55 за размещение рекламы в октябре, сумма 900 AZN. Оплатить в течение 7 дней.\" },\n  { id: 6, expected: \"invoice\", email_text: \"От: arenda@bizcenter.az\\nТема: Аренда офиса, ноябрь\\n\\nНаправляем счёт на аренду офиса за ноябрь: 1 500 AZN. Оплата до 3 ноября.\" },\n\n  { id: 7, expected: \"complaint\", email_text: \"От: nigar.h@mail.az\\nТема: Опоздание заказа\\n\\nЗаказ №8841 должны были привезти в понедельник, сегодня пятница, курьер не звонил. Это второй раз. Верните деньги.\" },\n  { id: 8, expected: \"complaint\", email_text: \"От: rauf@gmail.com\\nТема: Ужасное обслуживание\\n\\nВчера в вашем салоне мастер опоздала на час и испортила окрашивание. Хочу компенсацию.\" },\n  { id: 9, expected: \"complaint\", email_text: \"От: john.smith@mail.com\\nТема: Terrible experience\\n\\nMy package arrived damaged and your support ignored me for a week. This is unacceptable, I want a refund.\" },\n  { id: 10, expected: \"complaint\", email_text: \"От: aysel@mail.ru\\nТема: Не работает приложение\\n\\nПосле обновления приложение вылетает при каждом входе. Я плачу за подписку и не могу ей пользоваться. Исправьте немедленно.\" },\n  { id: 11, expected: \"complaint\", email_text: \"От: tural@inbox.az\\nТема: Хамство на кассе\\n\\nВаш кассир грубо разговаривал со мной и отказался вернуть товар с чеком. Прошу разобраться.\" },\n  { id: 12, expected: \"complaint\", email_text: \"От: elena.p@yandex.ru\\nТема: Двойное списание\\n\\nС моей карты дважды списали оплату за заказ №3920. Верните лишнее списание.\" },\n\n  { id: 13, expected: \"request\", email_text: \"От: info@kafe-dostlar.az\\nТема: Запрос цены\\n\\nМы кафе на 40 мест, хотим заказывать кофе в зёрнах по 20 кг в месяц. Пришлите прайс и условия доставки.\" },\n  { id: 14, expected: \"request\", email_text: \"От: clinic@zdorovie.az\\nТема: Консультация\\n\\nМы небольшая клиника, хотим автоматизировать запись пациентов. Сколько это стоит и можно ли созвониться завтра?\" },\n  { id: 15, expected: \"request\", email_text: \"От: purchase@bakuprint.az\\nТема: Запрос коммерческого предложения\\n\\nПросим выслать коммерческое предложение на 5000 листов мелованной бумаги А4.\" },\n  { id: 16, expected: \"request\", email_text: \"От: maria@startup.io\\nТема: Partnership inquiry\\n\\nHi, we would like to discuss integrating your service into our platform. Could you send details about API access and pricing?\" },\n  { id: 17, expected: \"request\", email_text: \"От: hr@logistika.az\\nТема: Заявка на обучение\\n\\nХотим записать 10 сотрудников на ваш курс по Excel. Какие даты доступны и какая стоимость?\" },\n  { id: 18, expected: \"request\", email_text: \"От: samir@gmail.com\\nТема: Заказ торта\\n\\nЗдравствуйте, хочу заказать торт на 20 человек на субботу. Какие варианты и цены?\" },\n\n  { id: 19, expected: \"spam\", email_text: \"От: promo@mega-deals-777.biz\\nТема: ВЫ ВЫИГРАЛИ!!!\\n\\nПоздравляем! Вы выиграли iPhone! Перейдите по ссылке и введите данные карты, чтобы получить приз.\" },\n  { id: 20, expected: \"spam\", email_text: \"От: sale@watch-outlet.xyz\\nТема: СКИДКА 90%!!!\\n\\nТолько сегодня! Купи реплику часов за $19. Переходи по ссылке и вводи данные карты прямо сейчас!\" },\n  { id: 21, expected: \"spam\", email_text: \"От: seo@rank-fast.net\\nТема: Выведем ваш сайт в ТОП-1\\n\\nГарантируем 10 000 посетителей за неделю всего за $50. Ответьте на это письмо прямо сейчас!\" },\n  { id: 22, expected: \"spam\", email_text: \"От: lottery@global-win.info\\nТема: Congratulations winner\\n\\nYou have been selected to receive 1,000,000 USD. Send your bank details and passport copy to claim.\" },\n  { id: 23, expected: \"spam\", email_text: \"От: crypto@moon-coin.io\\nТема: Удвоим ваши деньги\\n\\nВложите 100 USDT сегодня и получите 200 завтра. Без риска! Пишите в Telegram.\" },\n  { id: 24, expected: \"spam\", email_text: \"От: pharma@cheap-pills.biz\\nТема: Лекарства без рецепта\\n\\nСамые низкие цены, доставка по всему миру, без рецепта. Закажи сейчас со скидкой 70%.\" },\n\n  { id: 25, expected: \"other\", email_text: \"От: friend@gmail.com\\nТема: Привет\\n\\nПривет! Давно не виделись, как дела? Может, встретимся на выходных?\" },\n  { id: 26, expected: \"other\", email_text: \"От: colleague@company.az\\nТема: Встреча перенесена\\n\\nКоллеги, завтрашнюю планёрку переносим на 15:00. Просьба подтвердить участие.\" },\n  { id: 27, expected: \"other\", email_text: \"От: noreply@service.com\\nТема: Ваш пароль изменён\\n\\nПароль вашего аккаунта был успешно изменён. Если это были не вы, свяжитесь с поддержкой.\" },\n  { id: 28, expected: \"other\", email_text: \"От: news@techdigest.com\\nТема: Weekly digest\\n\\nThis week in tech: new laptop releases, open source updates and a look at upcoming conferences.\" },\n  { id: 29, expected: \"other\", email_text: \"От: mom@gmail.com\\nТема: Ужин\\n\\nСынок, не забудь, что в воскресенье ужин у бабушки. Приходи к шести.\" },\n  { id: 30, expected: \"other\", email_text: \"От: it@company.az\\nТема: Плановые работы\\n\\nВ ночь с пятницы на субботу будут проводиться технические работы на сервере. Почта может быть недоступна с 2:00 до 4:00.\" }\n];\n\nreturn emails.map(e => ({ json: e }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        608
+      ],
+      "id": "e8c9f680-377e-407c-9b24-4c8f754a713d",
+      "name": "Dataset"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Ты разбираешь входящие письма компании.\n\nОпредели тип письма:\n- invoice: счёт на оплату\n- complaint: жалоба клиента\n- request: заявка или запрос на услугу или товар\n- spam: нежелательная реклама, мошенничество, фишинг, запросы данных карты\n- other: всё остальное, включая новостные рассылки, системные уведомления и личные письма\n\nВ поле type используй строго одно из значений: invoice, complaint, request, spam, other. Отвечай только JSON, без пояснений.\n\nИзвлеки данные. Все поля должны присутствовать в ответе. Если текстового значения в письме нет, верни пустую строку \"\". Если числового значения нет (amount), верни 0.\nВ поле confidence укажи число от 0 до 1: насколько ты уверен в типе письма.\nПоле summary пиши одним предложением на русском.\n\nДату срока оплаты (due_date) пиши строго в формате ГГГГ-ММ-ДД, например 2026-10-25. Если даты нет, верни пустую строку \"\".\n\nПисьмо:\n{{ $json.email_text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        704,
+        0
+      ],
+      "id": "a75ba561-1e82-4c3f-8d32-76d5412d102e",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"invoice\",\n  \"sender\": \"Name Surname\",\n  \"amount\": 1000,\n  \"currency\": \"AZN\",\n  \"due_date\": \"2026-01-01\",\n  \"summary\": \"Short description\",\n  \"confidence\": 0.9\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        240
+      ],
+      "id": "9793c1bf-13a8-42fb-a121-4c96a68302e3",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "maxTokensToSample": 2048
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        688,
+        240
+      ],
+      "id": "2698570d-ddeb-40c5-b8ed-070a29e9d90f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "J2qg6GrmJHW6UDLe",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        896,
+        448
+      ],
+      "id": "4819c88a-2f58-4a38-a0b6-cb1996bd552e",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "J2qg6GrmJHW6UDLe",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Dataset').all();\nconst results = $input.all();\nlet correct = 0;\nconst wrong = [];\n\nresults.forEach((r, i) => {\n  const exp = data[i].json.expected;\n  const got = r.json.output.type;\n  if (exp === got) correct++;\n  else wrong.push({ id: data[i].json.id, expected: exp, got, confidence: r.json.output.confidence });\n});\n\nreturn [{ json: {\n  total: results.length,\n  correct,\n  accuracy: (correct / results.length * 100).toFixed(1) + '%',\n  wrong\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        608
+      ],
+      "id": "856eec15-fea3-4fc7-a476-7334a1a5b25a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        448,
+        608
+      ],
+      "id": "b3924dfe-ca59-4990-903d-ab7bd8e4b95f",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        480
+      ],
+      "id": "d56ca81d-9549-451f-bc8c-9cf965f70962",
+      "name": "Wait",
+      "webhookId": "c9962c02-60cb-4137-9794-01ffb9514b00"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dataset": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5419dfdb-0db3-4a80-98bc-4a2558a62e57",
+  "meta": {
+    "instanceId": "15c81e068a119906d0154d1e07a26665d5bb194fcbd311be4c5b599ce130810c"
+  },
+  "nodeGroups": [],
+  "id": "uNbRIXN1amvj7OTV",
+  "tags": []
+}

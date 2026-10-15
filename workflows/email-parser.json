@@ -1,0 +1,506 @@
+{
+  "name": "Email Parser",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b28dc1cd-8e29-4353-b5ff-894fca3b061d",
+              "name": "email_text",
+              "value": "=От: {{ $json.from }} Тема: {{ $json.subject }}  {{ $json.textPlain }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        256,
+        352
+      ],
+      "id": "df5edaeb-15cf-4cd8-bbfc-905395574b79",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Ты разбираешь входящие письма компании.\n\nОпредели тип письма:\n- invoice: счёт на оплату\n- complaint: жалоба клиента\n- request: заявка или запрос на услугу или товар\n- spam: нежелательная реклама, мошенничество, фишинг, запросы данных карты\n- other: всё остальное, включая новостные рассылки, системные уведомления и личные письма\n\nВ поле type используй строго одно из значений: invoice, complaint, request, spam, other. Отвечай только JSON, без пояснений.\n\nИзвлеки данные. Все поля должны присутствовать в ответе. Если текстового значения в письме нет, верни пустую строку \"\". Если числового значения нет (amount), верни 0.\nВ поле confidence укажи число от 0 до 1: насколько ты уверен в типе письма.\nПоле summary пиши одним предложением на русском.\n\nДату срока оплаты (due_date) пиши строго в формате ГГГГ-ММ-ДД, например 2026-10-25. Если даты нет, верни пустую строку \"\".\n\nПисьмо:\n{{ $json.email_text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        512,
+        352
+      ],
+      "id": "baab9acb-4348-4f9f-bd7c-3c5e90e30179",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"type\": \"invoice\",\n  \"sender\": \"Name Surname\",\n  \"amount\": 1000,\n  \"currency\": \"AZN\",\n  \"due_date\": \"2026-01-01\",\n  \"summary\": \"Short description\",\n  \"confidence\": 0.9\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        592
+      ],
+      "id": "6bb8c29a-148b-4c6f-bcc8-f37745efaeb3",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "maxTokensToSample": 2048
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        496,
+        592
+      ],
+      "id": "0bde1373-9d26-42ac-bff3-c4370d908f77",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "J2qg6GrmJHW6UDLe",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        704,
+        800
+      ],
+      "id": "dea1bf80-186c-4f61-a8f1-b4f57009256d",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "J2qg6GrmJHW6UDLe",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email_text": "={{ $('Edit Fields').item.json.email_text }}",
+            "type": "={{ $json.output.type }}",
+            "sender": "={{ $json.output.sender }}",
+            "amount": "={{ $json.output.amount }}",
+            "currency": "={{ $json.output.currency }}",
+            "due_date": "={{ $json.output.due_date }}",
+            "summary": "={{ $json.output.summary }}",
+            "confidence": "=\t{{ $json.output.confidence }}",
+            "status": "={{ $json.output.confidence >= 0.8 ? 'processed' : 'needs_review' }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email_text",
+              "displayName": "email_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sender",
+              "displayName": "sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "due_date",
+              "displayName": "due_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        976,
+        352
+      ],
+      "id": "37b0b0c4-224c-4e0e-b0f1-f67c7092a4fc",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "Ij3yMxp7f1Ilg84E",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=✅ Новое письмо: {{ $('Basic LLM Chain').item.json.output.type }} От: {{ $('Basic LLM Chain').item.json.output.sender }} Сумма: {{ $('Basic LLM Chain').item.json.output.amount }} {{ $('Basic LLM Chain').item.json.output.currency }} {{ $('Basic LLM Chain').item.json.output.summary }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1648,
+        256
+      ],
+      "id": "ab05cbba-8ec6-4e86-8151-282905e0c32d",
+      "name": "Send a text message",
+      "webhookId": "884e7f59-5e53-4204-83ef-a951ba327778",
+      "credentials": {
+        "telegramApi": {
+          "id": "wyIOGHEduGs5o80K",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=⚠️ Нужна проверка (уверенность {{ $('Basic LLM Chain').item.json.output.confidence }}) Тип: {{ $('Basic LLM Chain').item.json.output.type }} {{ $('Basic LLM Chain').item.json.output.summary }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1648,
+        448
+      ],
+      "id": "3b37d0e8-847c-45f8-8f1c-07d7045ffad9",
+      "name": "Send a text message1",
+      "webhookId": "0a533bc5-2bc8-4cce-bc01-7f219502f83a",
+      "credentials": {
+        "telegramApi": {
+          "id": "wyIOGHEduGs5o80K",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2b73a6d5-ed55-4978-8421-7b36358122d6",
+              "leftValue": "={{ $('Basic LLM Chain').item.json.output.type }}",
+              "rightValue": "spam",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1200,
+        352
+      ],
+      "id": "349a8097-3a66-4aa4-8074-4226dde476c5",
+      "name": "if"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e7214f73-64c3-495f-9eb1-6950da6f11b9",
+              "leftValue": "={{ $('Basic LLM Chain').item.json.output.confidence }}",
+              "rightValue": 0.9,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1424,
+        352
+      ],
+      "id": "fa4a2cc0-bb38-4de8-925a-77f51878bea6",
+      "name": "if1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        352
+      ],
+      "id": "da73ab72-7079-4434-b2f7-d874eec46570",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "GcHHAonJyFu6X2PN",
+          "name": "IMAP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "if",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if": {
+      "main": [
+        [
+          {
+            "node": "if1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6d2a3a92-0a7f-4a4c-87c1-f2b88963cf00",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "15c81e068a119906d0154d1e07a26665d5bb194fcbd311be4c5b599ce130810c"
+  },
+  "nodeGroups": [],
+  "id": "syG1D7tvjvj2v02H",
+  "tags": []
+}
