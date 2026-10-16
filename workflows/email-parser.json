@@ -8,7 +8,7 @@
             {
               "id": "b28dc1cd-8e29-4353-b5ff-894fca3b061d",
               "name": "email_text",
-              "value": "=От: {{ $json.from }} Тема: {{ $json.subject }}  {{ $json.textPlain }}",
+              "value": "=От: {{ $('Email Trigger (IMAP)').first().json.from }}\nТема: {{ $('Email Trigger (IMAP)').first().json.subject }}\n\n{{ $('Email Trigger (IMAP)').first().json.textPlain }}\n{{ $json.has_text ? '\\n\\nТекст вложения (PDF):\\n' + $json.text : '' }}",
               "type": "string"
             }
           ]
@@ -18,8 +18,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        256,
-        352
+        -48,
+        688
       ],
       "id": "df5edaeb-15cf-4cd8-bbfc-905395574b79",
       "name": "Edit Fields"
@@ -34,8 +34,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        512,
-        352
+        208,
+        688
       ],
       "id": "baab9acb-4348-4f9f-bd7c-3c5e90e30179",
       "name": "Basic LLM Chain"
@@ -48,8 +48,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        624,
-        592
+        320,
+        928
       ],
       "id": "6bb8c29a-148b-4c6f-bcc8-f37745efaeb3",
       "name": "Structured Output Parser"
@@ -64,8 +64,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        496,
-        592
+        192,
+        928
       ],
       "id": "0bde1373-9d26-42ac-bff3-c4370d908f77",
       "name": "Groq Chat Model",
@@ -84,8 +84,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        704,
-        800
+        400,
+        1136
       ],
       "id": "dea1bf80-186c-4f61-a8f1-b4f57009256d",
       "name": "Groq Chat Model1",
@@ -235,8 +235,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.7,
       "position": [
-        976,
-        352
+        672,
+        688
       ],
       "id": "37b0b0c4-224c-4e0e-b0f1-f67c7092a4fc",
       "name": "Insert rows in a table",
@@ -249,49 +249,21 @@
     },
     {
       "parameters": {
-        "chatId": "YOUR_CHAT_ID",
-        "text": "=✅ Новое письмо: {{ $('Basic LLM Chain').item.json.output.type }} От: {{ $('Basic LLM Chain').item.json.output.sender }} Сумма: {{ $('Basic LLM Chain').item.json.output.amount }} {{ $('Basic LLM Chain').item.json.output.currency }} {{ $('Basic LLM Chain').item.json.output.summary }}",
-        "additionalFields": {
-          "appendAttribution": false
-        }
+        "downloadAttachments": true,
+        "options": {}
       },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.2,
       "position": [
-        1648,
-        256
+        -720,
+        688
       ],
-      "id": "ab05cbba-8ec6-4e86-8151-282905e0c32d",
-      "name": "Send a text message",
-      "webhookId": "884e7f59-5e53-4204-83ef-a951ba327778",
+      "id": "da73ab72-7079-4434-b2f7-d874eec46570",
+      "name": "Email Trigger (IMAP)",
       "credentials": {
-        "telegramApi": {
-          "id": "wyIOGHEduGs5o80K",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "chatId": "YOUR_CHAT_ID",
-        "text": "=⚠️ Нужна проверка (уверенность {{ $('Basic LLM Chain').item.json.output.confidence }}) Тип: {{ $('Basic LLM Chain').item.json.output.type }} {{ $('Basic LLM Chain').item.json.output.summary }}",
-        "additionalFields": {
-          "appendAttribution": false
-        }
-      },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1648,
-        448
-      ],
-      "id": "3b37d0e8-847c-45f8-8f1c-07d7045ffad9",
-      "name": "Send a text message1",
-      "webhookId": "0a533bc5-2bc8-4cce-bc01-7f219502f83a",
-      "credentials": {
-        "telegramApi": {
-          "id": "wyIOGHEduGs5o80K",
-          "name": "Telegram account"
+        "imap": {
+          "id": "GcHHAonJyFu6X2PN",
+          "name": "IMAP account"
         }
       }
     },
@@ -322,11 +294,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1200,
-        352
+        896,
+        688
       ],
       "id": "349a8097-3a66-4aa4-8074-4226dde476c5",
-      "name": "if"
+      "name": "Not spam?"
     },
     {
       "parameters": {
@@ -355,30 +327,121 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1424,
-        352
+        1120,
+        688
       ],
       "id": "fa4a2cc0-bb38-4de8-925a-77f51878bea6",
-      "name": "if1"
+      "name": "Confident?"
     },
     {
       "parameters": {
-        "options": {}
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=✅ Новое письмо: {{ $('Basic LLM Chain').item.json.output.type }} От: {{ $('Basic LLM Chain').item.json.output.sender }} Сумма: {{ $('Basic LLM Chain').item.json.output.amount }} {{ $('Basic LLM Chain').item.json.output.currency }} {{ $('Basic LLM Chain').item.json.output.summary }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
       },
-      "type": "n8n-nodes-base.emailReadImap",
-      "typeVersion": 2.2,
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
       "position": [
-        32,
-        352
+        1344,
+        592
       ],
-      "id": "da73ab72-7079-4434-b2f7-d874eec46570",
-      "name": "Email Trigger (IMAP)",
+      "id": "ab05cbba-8ec6-4e86-8151-282905e0c32d",
+      "name": "Notify: OK",
+      "webhookId": "884e7f59-5e53-4204-83ef-a951ba327778",
       "credentials": {
-        "imap": {
-          "id": "GcHHAonJyFu6X2PN",
-          "name": "IMAP account"
+        "telegramApi": {
+          "id": "wyIOGHEduGs5o80K",
+          "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "=⚠️ Нужна проверка (уверенность {{ $('Basic LLM Chain').item.json.output.confidence }}) Тип: {{ $('Basic LLM Chain').item.json.output.type }} {{ $('Basic LLM Chain').item.json.output.summary }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        784
+      ],
+      "id": "3b37d0e8-847c-45f8-8f1c-07d7045ffad9",
+      "name": "Notify: needs review",
+      "webhookId": "0a533bc5-2bc8-4cce-bc01-7f219502f83a",
+      "credentials": {
+        "telegramApi": {
+          "id": "wyIOGHEduGs5o80K",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "85218dc1-ce4a-4898-b375-f2a29e680490",
+              "leftValue": "=   {{ Object.keys($binary || {}).length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -496,
+        688
+      ],
+      "id": "9693b343-cc63-447a-b4f9-19cbec14bcc6",
+      "name": "Has attachment?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://pdf-service:8000/extract",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "attachment_0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -272,
+        624
+      ],
+      "id": "25c43e6a-42ed-46ed-9753-1bc07220930c",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput"
     }
   ],
   "pinData": {},
@@ -442,36 +505,7 @@
       "main": [
         [
           {
-            "node": "if",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "if": {
-      "main": [
-        [
-          {
-            "node": "if1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "if1": {
-      "main": [
-        [
-          {
-            "node": "Send a text message",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Send a text message1",
+            "node": "Not spam?",
             "type": "main",
             "index": 0
           }
@@ -482,6 +516,71 @@
       "main": [
         [
           {
+            "node": "Has attachment?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not spam?": {
+      "main": [
+        [
+          {
+            "node": "Confident?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confident?": {
+      "main": [
+        [
+          {
+            "node": "Notify: OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify: needs review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has attachment?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Edit Fields",
             "type": "main",
             "index": 0
@@ -490,12 +589,12 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "6d2a3a92-0a7f-4a4c-87c1-f2b88963cf00",
+  "versionId": "6fa2826e-5a48-4bd3-88d4-8bbc4a62be2f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "15c81e068a119906d0154d1e07a26665d5bb194fcbd311be4c5b599ce130810c"
