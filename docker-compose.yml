@@ -26,6 +26,10 @@ services:
     depends_on:
       - postgres
 
+  pdf-service:
+    build: ./pdf-service
+    restart: unless-stopped
+
 volumes:
   pg_data:
   n8n_data:
