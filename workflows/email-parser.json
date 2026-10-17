@@ -48,8 +48,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        320,
-        928
+        312,
+        920
       ],
       "id": "6bb8c29a-148b-4c6f-bcc8-f37745efaeb3",
       "name": "Structured Output Parser"
@@ -64,8 +64,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        192,
-        928
+        184,
+        920
       ],
       "id": "0bde1373-9d26-42ac-bff3-c4370d908f77",
       "name": "Groq Chat Model",
@@ -84,8 +84,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        400,
-        1136
+        392,
+        1128
       ],
       "id": "dea1bf80-186c-4f61-a8f1-b4f57009256d",
       "name": "Groq Chat Model1",
@@ -113,14 +113,14 @@
           "mappingMode": "defineBelow",
           "value": {
             "email_text": "={{ $('Edit Fields').item.json.email_text }}",
-            "type": "={{ $json.output.type }}",
-            "sender": "={{ $json.output.sender }}",
-            "amount": "={{ $json.output.amount }}",
-            "currency": "={{ $json.output.currency }}",
-            "due_date": "={{ $json.output.due_date }}",
-            "summary": "={{ $json.output.summary }}",
-            "confidence": "=\t{{ $json.output.confidence }}",
-            "status": "={{ $json.output.confidence >= 0.8 ? 'processed' : 'needs_review' }}"
+            "type": "={{ $('Basic LLM Chain').item.json.output.type }}",
+            "sender": "={{ $('Basic LLM Chain').item.json.output.sender }}",
+            "amount": "=\t{{ $('Basic LLM Chain').item.json.output.amount }}",
+            "currency": "={{ $('Basic LLM Chain').item.json.output.currency }}",
+            "due_date": "={{ $('Basic LLM Chain').item.json.output.due_date }}",
+            "summary": "={{ $('Basic LLM Chain').item.json.output.summary }}",
+            "confidence": "={{ $('Basic LLM Chain').item.json.output.confidence }}",
+            "status": "={{ $json.status || 'needs_review' }}"
           },
           "matchingColumns": [
             "id"
@@ -235,7 +235,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.7,
       "position": [
-        672,
+        896,
         688
       ],
       "id": "37b0b0c4-224c-4e0e-b0f1-f67c7092a4fc",
@@ -294,7 +294,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        896,
+        1120,
         688
       ],
       "id": "349a8097-3a66-4aa4-8074-4226dde476c5",
@@ -312,11 +312,11 @@
           "conditions": [
             {
               "id": "e7214f73-64c3-495f-9eb1-6950da6f11b9",
-              "leftValue": "={{ $('Basic LLM Chain').item.json.output.confidence }}",
-              "rightValue": 0.9,
+              "leftValue": "={{ $('Validate result').item.json.status }}",
+              "rightValue": "processed",
               "operator": {
-                "type": "number",
-                "operation": "gte"
+                "type": "string",
+                "operation": "equals"
               }
             }
           ],
@@ -327,7 +327,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1120,
+        1344,
         688
       ],
       "id": "fa4a2cc0-bb38-4de8-925a-77f51878bea6",
@@ -344,7 +344,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1344,
+        1568,
         592
       ],
       "id": "ab05cbba-8ec6-4e86-8151-282905e0c32d",
@@ -368,7 +368,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1344,
+        1568,
         784
       ],
       "id": "3b37d0e8-847c-45f8-8f1c-07d7045ffad9",
@@ -442,6 +442,25 @@
       "id": "25c43e6a-42ed-46ed-9753-1bc07220930c",
       "name": "HTTP Request",
       "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://pdf-service:8000/validate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        688
+      ],
+      "id": "c5be6728-0431-41b5-8579-0f4dafec4827",
+      "name": "Validate result",
+      "onError": "continueErrorOutput"
     }
   ],
   "pinData": {},
@@ -494,7 +513,7 @@
       "main": [
         [
           {
-            "node": "Insert rows in a table",
+            "node": "Validate result",
             "type": "main",
             "index": 0
           }
@@ -587,6 +606,24 @@
           }
         ]
       ]
+    },
+    "Validate result": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -594,7 +631,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "6fa2826e-5a48-4bd3-88d4-8bbc4a62be2f",
+  "versionId": "c5c6048c-53a5-407f-8fed-c88f40b0311e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "15c81e068a119906d0154d1e07a26665d5bb194fcbd311be4c5b599ce130810c"
